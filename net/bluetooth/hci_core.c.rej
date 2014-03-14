@@ -1,0 +1,23 @@
+--- net/bluetooth/hci_core.c
++++ net/bluetooth/hci_core.c
+@@ -509,6 +509,11 @@
+ 
+ 	hci_req_lock(hdev);
+ 
++	if (test_bit(HCI_UNREGISTER, &hdev->flags)) {
++		ret = -ENODEV;
++		goto done;
++	}
++
+ 	if (hdev->rfkill && rfkill_blocked(hdev->rfkill)) {
+ 		ret = -ERFKILL;
+ 		goto done;
+@@ -1317,6 +1322,8 @@
+ 
+ 	BT_DBG("%p name %s bus %d", hdev, hdev->name, hdev->bus);
+ 
++	set_bit(HCI_UNREGISTER, &hdev->flags);
++
+ 	write_lock_bh(&hci_dev_list_lock);
+ 	list_del(&hdev->list);
+ 	write_unlock_bh(&hci_dev_list_lock);
